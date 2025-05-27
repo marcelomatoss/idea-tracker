@@ -1,0 +1,54 @@
+
+version: '3.8'
+
+services:
+  # Backend API
+  idea-tracker-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    container_name: idea-tracker-backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    volumes:
+      - backend-data:/app/data
+
+  # Frontend (Production)
+  idea-tracker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    container_name: idea-tracker-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - idea-tracker-backend
+
+  # Frontend (Development)
+  idea-tracker-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8080:8080"
+    container_name: idea-tracker-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3001
+    depends_on:
+      - idea-tracker-backend
+    profiles:
+      - dev
+
+volumes:
+  backend-data:

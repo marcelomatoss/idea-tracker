@@ -1,0 +1,22 @@
+
+# Dockerfile para desenvolvimento
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Configurar yarn para ser mais resiliente a timeouts
+RUN yarn config set network-timeout 300000
+RUN yarn config set registry https://registry.yarnpkg.com
+
+# Instalar dependências
+COPY package.json ./
+RUN yarn install --network-timeout 300000 || yarn install --network-timeout 300000 || yarn install --network-timeout 300000
+
+# Copiar código fonte
+COPY . .
+
+# Expor porta de desenvolvimento
+EXPOSE 8080
+
+# Comando para desenvolvimento
+CMD ["yarn", "dev", "--host", "0.0.0.0"]

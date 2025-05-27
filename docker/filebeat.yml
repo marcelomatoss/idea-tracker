@@ -1,0 +1,36 @@
+
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/app/*.log
+  fields:
+    service: idea-tracker-backend
+  fields_under_root: true
+  multiline.pattern: '^\d{4}-\d{2}-\d{2}'
+  multiline.negate: true
+  multiline.match: after
+
+- type: container
+  enabled: true
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+  processors:
+    - add_docker_metadata:
+        host: "unix:///var/run/docker.sock"
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "idea-tracker-%{+yyyy.MM.dd}"
+
+setup.template.name: "idea-tracker"
+setup.template.pattern: "idea-tracker-*"
+setup.template.enabled: true
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644

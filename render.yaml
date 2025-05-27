@@ -1,0 +1,18 @@
+
+services:
+  - type: web
+    name: idea-tracker-frontend
+    env: static
+    buildCommand: yarn install && yarn build
+    staticPublishPath: ./dist
+    
+  - type: web
+    name: idea-tracker-backend
+    env: node
+    buildCommand: cd backend && yarn install
+    startCommand: cd backend && yarn start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001

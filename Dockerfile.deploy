@@ -1,0 +1,39 @@
+
+# Dockerfile unificado para deploy simples (frontend + backend)
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Configurar yarn para ser mais resiliente a timeouts
+RUN yarn config set network-timeout 300000
+RUN yarn config set registry https://registry.yarnpkg.com
+
+# Copiar e instalar dependências do frontend
+COPY package.json ./
+RUN yarn install --network-timeout 300000 || yarn install --network-timeout 300000 || yarn install --network-timeout 300000
+
+# Copiar e instalar dependências do backend
+COPY backend/package.json ./backend/
+WORKDIR /app/backend
+RUN yarn install --production --network-timeout 300000 || yarn install --production --network-timeout 300000 || yarn install --production --network-timeout 300000
+
+# Voltar para o diretório principal
+WORKDIR /app
+
+# Copiar código fonte
+COPY . .
+
+# Build do frontend
+RUN yarn build
+
+# Criar diretório de dados do backend
+RUN mkdir -p backend/data
+
+# Expor portas
+EXPOSE 3000 3001
+
+# Script para iniciar ambos os serviços
+COPY start-services.sh ./
+RUN chmod +x start-services.sh
+
+CMD ["./start-services.sh"]
